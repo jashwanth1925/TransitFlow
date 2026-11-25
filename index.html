@@ -1,0 +1,560 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TransitFlow | Shipment Management</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #e7e7ed;
+            color: #5a5a60;
+        }
+
+        /* Sidebar */
+
+        .sidebar {
+            width: 230px;
+            height: 100vh;
+            background: rgb(200, 195, 210);
+            position: fixed;
+            padding: 25px;
+            border-right: 1px solid #b9b9c6;
+        }
+
+        .logo {
+            color: #6258e8;
+            margin-bottom: 40px;
+        }
+
+        .sidebar nav a {
+            display: block;
+            text-decoration: none;
+            color: #62677a;
+            padding: 14px 10px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+        }
+
+        .sidebar nav a:hover {
+            background: #efedff;
+            color: #6258e8;
+        }
+
+        .user {
+            position: absolute;
+            bottom: 25px;
+            font-size: 13px;
+        }
+
+        /* Main content */
+
+        .main-content {
+            margin-left: 230px;
+            padding: 30px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .topbar p {
+            color: #888;
+            margin-top: 8px;
+        }
+
+        button {
+            background: #6258e8;
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 7px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #5045d0;
+        }
+
+        /* Dashboard cards */
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 22px;
+            border-radius: 10px;
+            box-shadow: 0 3px 12px #00000008;
+        }
+
+        .stat-card h3 {
+            color: #85899b;
+            font-size: 14px;
+        }
+
+        .stat-card h2 {
+            margin: 15px 0;
+            font-size: 28px;
+            color: #6258e8;
+        }
+
+        .stat-card p {
+            color: #999;
+            font-size: 12px;
+        }
+
+        /* Panels */
+
+        .panel {
+            background: white;
+            padding: 22px;
+            border-radius: 10px;
+            margin-bottom: 22px;
+            box-shadow: 0 3px 12px #00000008;
+        }
+
+        .section-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-heading p {
+            color: #999;
+            font-size: 13px;
+            margin-top: 6px;
+        }
+
+        input, select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            outline: none;
+            margin-bottom: 12px;
+        }
+
+        /* Shipment table */
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 650px;
+        }
+
+        th, td {
+            padding: 15px 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            color: #9296a5;
+            font-size: 12px;
+        }
+
+        td {
+            font-size: 13px;
+        }
+
+        .status {
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+        }
+
+        .In-Transit {
+            background: #e8f2ff;
+            color: #397dcc;
+        }
+
+        .Delivered {
+            background: #e5f8ef;
+            color: #159b73;
+        }
+
+        .Delayed {
+            background: #fff0e5;
+            color: #d97724;
+        }
+
+        .Processing {
+            background: #eeeef5;
+            color: #777;
+        }
+
+        /* Delay alerts */
+
+        .alert {
+            background: #fff5ed;
+            border-left: 4px solid #e68a36;
+            padding: 15px;
+            margin-top: 12px;
+            border-radius: 5px;
+        }
+
+        .alert p {
+            color: #777;
+            margin-top: 5px;
+        }
+
+        /* Shipment timeline */
+
+        .timeline {
+            margin-top: 25px;
+            margin-left: 10px;
+        }
+
+        .step {
+            display: flex;
+            gap: 15px;
+            min-height: 75px;
+            position: relative;
+        }
+
+        .step:not(:last-child)::after {
+            content: "";
+            position: absolute;
+            left: 12px;
+            top: 28px;
+            height: 45px;
+            border-left: 2px dashed #ddd;
+        }
+
+        .step span {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: #eee;
+            color: #888;
+            display: grid;
+            place-items: center;
+        }
+
+        .step.completed span {
+            background: #dcf6e9;
+            color: #159b73;
+        }
+
+        .step.current span {
+            background: #efedff;
+            color: #6258e8;
+        }
+
+        .step p {
+            color: #999;
+            margin-top: 5px;
+            font-size: 12px;
+        }
+
+        /* History */
+
+        #historyList p {
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+            color: #777;
+        }
+
+        /* Shipment form */
+
+        dialog {
+            border: none;
+            border-radius: 12px;
+            padding: 25px;
+            width: 400px;
+            max-width: calc(100% - 30px);
+            margin: auto;
+            box-shadow: 0 10px 50px #0003;
+        }
+
+        dialog::backdrop {
+            background: #151a2c88;
+        }
+
+        dialog h2 {
+            margin-bottom: 20px;
+        }
+
+        dialog label {
+            display: block;
+            font-size: 13px;
+            margin-bottom: 6px;
+        }
+
+        dialog input, dialog select {
+            width: 100%;
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        #closeForm {
+            background: #777;
+        }
+
+        /* Responsive design */
+
+        @media (max-width: 900px) {
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .sidebar {
+                display: none;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 15px;
+            }
+
+            .topbar {
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .topbar h1 {
+                font-size: 20px;
+            }
+
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .section-heading {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <aside class="sidebar">
+
+        <h2 class="logo">TransitFlow</h2>
+
+        <nav>
+            <a href="#overview">Dashboard</a>
+            <a href="#shipments">Shipments</a>
+            <a href="#alerts">Delay Alerts</a>
+            <a href="#history">Shipment History</a>
+        </nav>
+
+
+    </aside>
+
+    <main class="main-content">
+
+        <header class="topbar">
+
+            <div>
+                <h1>Shipment Overview</h1>
+                <p>Track and manage your supply chain deliveries.</p>
+            </div>
+
+            <button id="openForm">+ Create Shipment</button>
+
+        </header>
+
+        <section class="stats" id="overview">
+
+            <article class="stat-card">
+                <h3>Total Shipments</h3>
+                <h2 id="total">248</h2>
+                <p>All shipments</p>
+            </article>
+
+            <article class="stat-card">
+                <h3>In Transit</h3>
+                <h2 id="transit">86</h2>
+                <p>Currently moving</p>
+            </article>
+
+            <article class="stat-card">
+                <h3>Delivered</h3>
+                <h2 id="delivered">149</h2>
+                <p>Successfully delivered</p>
+            </article>
+
+            <article class="stat-card">
+                <h3>Delayed</h3>
+                <h2 id="delayed">13</h2>
+                <p>Needs attention</p>
+            </article>
+
+        </section>
+
+        <section class="panel" id="shipments">
+
+            <div class="section-heading">
+                <div>
+                    <h2>Active Shipments</h2>
+                    <p>Monitor your shipments across the supply chain.</p>
+                </div>
+
+                <input type="search" id="search"
+                       placeholder="Search shipment...">
+            </div>
+
+            <select id="statusFilter">
+                <option value="All">All Statuses</option>
+                <option value="In Transit">In Transit</option>
+                <option value="Delivered">Delivered</option>
+                <option value="Delayed">Delayed</option>
+                <option value="Processing">Processing</option>
+            </select>
+
+            <div class="table-container">
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Shipment ID</th>
+                            <th>Origin</th>
+                            <th>Destination</th>
+                            <th>Transport</th>
+                            <th>ETA</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="shipmentTable"></tbody>
+                </table>
+
+            </div>
+
+        </section>
+
+        <section class="panel" id="alerts">
+            <h2>Delay Alerts</h2>
+            <div id="alertList"></div>
+        </section>
+
+        <section class="panel">
+
+            <h2>Shipment Journey</h2>
+
+            <select id="journeySelect"></select>
+
+            <div class="timeline">
+
+                <div class="step completed">
+                    <span>✓</span>
+                    <div>
+                        <h3>Shipment Created</h3>
+                        <p>Goods registered at origin</p>
+                    </div>
+                </div>
+
+                <div class="step completed">
+                    <span>✓</span>
+                    <div>
+                        <h3>Picked Up</h3>
+                        <p>Goods collected from supplier</p>
+                    </div>
+                </div>
+
+                <div class="step current">
+                    <span>●</span>
+                    <div>
+                        <h3 id="currentStage">In Transit</h3>
+                        <p>Goods moving towards destination</p>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <span>○</span>
+                    <div>
+                        <h3>Delivered</h3>
+                        <p>Shipment reaches customer</p>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+        <section class="panel" id="history">
+            <h2>Recent Shipment History</h2>
+            <div id="historyList"></div>
+        </section>
+
+    </main>
+
+    <dialog id="shipmentDialog">
+
+        <form id="shipmentForm">
+
+            <h2>Create New Shipment</h2>
+
+            <label>Shipment ID</label>
+            <input type="text" id="shipmentId" required>
+
+            <label>Origin</label>
+            <input type="text" id="origin" required>
+
+            <label>Destination</label>
+            <input type="text" id="destination" required>
+
+            <label>Transport Mode</label>
+            <select id="transport">
+                <option>Road</option>
+                <option>Rail</option>
+                <option>Air</option>
+                <option>Ocean</option>
+            </select>
+
+            <label>Estimated Delivery</label>
+            <input type="date" id="eta" required>
+
+            <label>Status</label>
+            <select id="status">
+                <option>Processing</option>
+                <option>In Transit</option>
+                <option>Delayed</option>
+                <option>Delivered</option>
+            </select>
+
+            <div class="form-buttons">
+                <button type="submit">Create Shipment</button>
+                <button type="button" id="closeForm">Cancel</button>
+            </div>
+
+        </form>
+
+    </dialog>
+
+    <script src="script.js"></script>
+
+</body>
+</html>
+
